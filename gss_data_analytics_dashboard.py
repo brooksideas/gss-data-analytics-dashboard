@@ -529,6 +529,7 @@ app.layout = html.Div([
 # Define the app layout
 app = JupyterDash(__name__, external_stylesheets=external_stylesheets)
 
+# Income impacted
 # Number of Childrens
 children_options = [0, 1, 2, 3, 4, 5, 6, 7, 8]
 sex_options = gss_clean['sex'].unique().tolist()
@@ -620,38 +621,51 @@ app.layout = html.Div([
 
     # Second row
     html.Div([
-        # Dropdowns and Sample Plot
+        # Dropdowns and Care giver Plot
         html.Div([
-            html.H3('Problem 3: Sample Plot by Dropdowns'),
-            html.Div([
-                html.P('Select Number of Children:'),
-                dcc.Dropdown(
-                    id='children-dropdown',
-                    options=[{'label': i, 'value': i}
-                             for i in children_options],
-                    value=children_options[0]
-                ),
-            ], style={'width': '25%', 'display': 'inline-block', 'padding': '5%'}),
-
+            html.H3('Income impacted by Care'),
             html.Div([
                 html.P('Select Sex:'),
                 dcc.Dropdown(
-                    id='sex-dropdown',
+                    id='sex_dropdown',
                     options=[{'label': i, 'value': i} for i in sex_options],
                     value=sex_options[0]
                 ),
-            ], style={'width': '25%', 'display': 'inline-block'}),
-
+            ],  style={
+                'width': '50%',
+                'display': 'block',
+                'padding': '25px',
+                'margin': '40px 0px 40px 0px'
+            }),
+            html.Div([
+                html.P('Number of Children:'),
+                dcc.Dropdown(
+                    id='children_dropdown',
+                    options=[{'label': i, 'value': i}
+                             for i in children_options],
+                    value=children_options[2]
+                ),
+            ], style={
+                'width': '50%',
+                'display': 'inline-block',
+                'padding': '25px',
+                'margin': '40px 0px 40px 0px'
+            }),
             html.Div([
                 html.P('Select Region:'),
                 dcc.Dropdown(
-                    id='region-dropdown',
+                    id='region_dropdown',
                     options=[{'label': i, 'value': i} for i in region_options],
-                    value=region_options[0]
+                    value=region_options[1]
                 ),
-            ], style={'width': '25%', 'display': 'inline-block'}),
+            ], style={
+                'width': '50%',
+                'display': 'block',
+                'padding': '25px',
+                'margin': '40px 0px 40px 0px'
+            }),
 
-            # dcc.Graph(id='sample_plot_id', figure=sample_plot_figure),
+            dcc.Graph(id='care_plot_id'),
         ], className='six columns'),
 
         # US Map
@@ -659,7 +673,7 @@ app.layout = html.Div([
         # html.Div([
         #     html.H3('US Map'),
 
-        #     # dcc.Graph(id='us_map_id', figure=male_breadwinner_barplot_figure),
+        #     # dcc.Graph(id='us_map_id', figure=us_map_figure),
         # ], className='six columns'),
     ], className='row'),
     # Third row
@@ -734,7 +748,31 @@ app.layout = html.Div([
 ], style={'width': '100%', 'margin': '0 auto'})
 
 
-# Define the callback to update the barplot based on user inputs
+# Define the callback to update figures based on user inputs
+
+# define callback to update scatter plot
+@app.callback(
+    Output('care_plot_id', 'figure'),
+    [Input('sex_dropdown', 'value'),
+     Input('children_dropdown', 'value'),
+     Input('region_dropdown', 'value')]
+)
+def update_scatter_plot(sex, children, region):
+    # filter data based on dropdown selections
+    data = gss_clean[(gss_clean['sex'] == sex) &
+                     (gss_clean['children_number'] == children) &
+                     (gss_clean['region'] == region)]
+    data = data.assign(gender=data['sex'])
+    fig = px.scatter(data, x='respondent_income', y='children_number',
+                     color='respondent_income',
+                     facet_col='region',
+                     title='Respondents Income vs Children Number by Region and Sex',
+                     labels={'respondent_income': 'Respondent Income', 'children_number': 'Children Number'})
+
+    fig.update_layout(xaxis=dict(ticksuffix='K'))
+    # display the plot
+    # dcc.Graph(id='scatter_plot_id', figure=fig)
+    return fig
 
 
 @app.callback(
