@@ -1,0 +1,8 @@
+numpy
+pandas
+plotly
+dash
+jupyter-dash
+nbformat
+jinja2
+markupsafe
