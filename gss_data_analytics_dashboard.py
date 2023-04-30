@@ -26,7 +26,7 @@ from jupyter_dash import JupyterDash
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
-import random 
+import random
 import nbformat
 from nbconvert.exporters.html import HTMLExporter
 from nbconvert.filters.markdown_mistune import markdown2html_mistune
@@ -513,9 +513,6 @@ app.layout = html.Div([
 # In[ ]:
 
 
-
-
-
 # In[ ]:
 # ## Extra Credit (up to 10 bonus points)
 # Dashboards are all about good design, functionality, and accessability. For this extra credit problem, create another version of the dashboard you built for problem 7, but take extra steps to improve the appearance of the dashboard, add user-inputs, and host it on the internet with its own URL.
@@ -527,7 +524,16 @@ app.layout = html.Div([
 # **Challenge 3**: Follow the steps listed in the module notebook to deploy your dashboard on Heroku. 1 bonus point will be awarded for a Heroku link to an app that isn't working. 4 bonus points will be awarded for a working Heroku link.
 
 # In[ ]:
-# Define the layout
+
+# In[ ]:
+# Define the app layout
+app = JupyterDash(__name__, external_stylesheets=external_stylesheets)
+
+# Number of Childrens
+children_options = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+sex_options = gss_clean['sex'].unique().tolist()
+region_options = gss_clean['region'].unique().tolist()
+# Male Breadwinner Functions
 barplot_layout = go.Layout(
     xaxis={'title': 'Level of Agreement'},
     yaxis={'title': 'Number of Respondents'},
@@ -551,38 +557,18 @@ dropdown_options = {
     ]
 }
 
-# Define the app layout
-app = JupyterDash(__name__, external_stylesheets=external_stylesheets)
-app.layout = html.Div([
-    dcc.Dropdown(
-        id='feature_dropdown_id',
-        options=dropdown_options['feature'],
-        value='male_breadwinner'
-    ),
-    dcc.Dropdown(
-        id='group_by_dropdown_id',
-        options=dropdown_options['group_by'],
-        value='sex'
-    ),
-    dcc.Graph(
-        id='male_breadwinner_barplot_id',
-        figure={
-            'data': [],
-            'layout': barplot_layout
-        }
-    )
-])
 
 def drop_down_data_generator(feature, group_by):
-    # Drop Down Lists 
-    drop_down_data = [] 
-    
+    # Drop Down Lists
+    drop_down_data = []
+
     # Generate a random color for the group and append here
     group_colors = {}
-    
+
     for group in gss_clean[group_by].unique():
         group_color = f'#{random.randint(0, 0xFFFFFF):06x}'
-        filtered_data = gss_clean[gss_clean[group_by] == group][feature].value_counts()
+        filtered_data = gss_clean[gss_clean[group_by]
+                                  == group][feature].value_counts()
         drop_down_data.append(go.Bar(
             x=filtered_data.index,
             y=filtered_data.values,
@@ -591,7 +577,166 @@ def drop_down_data_generator(feature, group_by):
         ))
     return drop_down_data
 
+
+# Remaining figures list
+figures = [
+    {
+        'id': 'job_prestige_income_scatterplot_id',
+        'figure': job_prestige_income_scatterplot_figure,
+    },
+    {
+        'id': 'income_boxplot_id',
+        'figure': income_boxplot_figure
+    },
+    {
+        'id': 'prestige_boxplot_id',
+        'figure': prestige_boxplot_figure,
+    },
+    {
+        'id': 'job_prestige_facet_grid_id',
+        'figure': job_prestige_facet_grid_figure
+    },
+]
+
+
+# Main Layout organizer
+app.layout = html.Div([
+    # GSS Analysis Title
+    html.H1('GSS Data Analysis', style={'text-align': 'center'}),
+
+    # First row
+    html.Div([
+        # GSS Paragraphs
+        html.Div([
+            dcc.Markdown(children=General_Social_Survey_GSS_paragraph),
+        ], className='six columns'),
+
+        # Mean Characteristics Table
+        html.Div([
+            dcc.Markdown(children=gender_wage_gap_paragraph),
+            dcc.Graph(id='mean_table_id', figure=mean_table_figure),
+        ], className='six columns'),
+    ], className='row'),
+
+    # Second row
+    html.Div([
+        # Dropdowns and Sample Plot
+        html.Div([
+            html.H3('Problem 3: Sample Plot by Dropdowns'),
+            html.Div([
+                html.P('Select Number of Children:'),
+                dcc.Dropdown(
+                    id='children-dropdown',
+                    options=[{'label': i, 'value': i}
+                             for i in children_options],
+                    value=children_options[0]
+                ),
+            ], style={'width': '25%', 'display': 'inline-block', 'padding': '5%'}),
+
+            html.Div([
+                html.P('Select Sex:'),
+                dcc.Dropdown(
+                    id='sex-dropdown',
+                    options=[{'label': i, 'value': i} for i in sex_options],
+                    value=sex_options[0]
+                ),
+            ], style={'width': '25%', 'display': 'inline-block'}),
+
+            html.Div([
+                html.P('Select Region:'),
+                dcc.Dropdown(
+                    id='region-dropdown',
+                    options=[{'label': i, 'value': i} for i in region_options],
+                    value=region_options[0]
+                ),
+            ], style={'width': '25%', 'display': 'inline-block'}),
+
+            # dcc.Graph(id='sample_plot_id', figure=sample_plot_figure),
+        ], className='six columns'),
+
+        # US Map
+
+        # html.Div([
+        #     html.H3('US Map'),
+
+        #     # dcc.Graph(id='us_map_id', figure=male_breadwinner_barplot_figure),
+        # ], className='six columns'),
+    ], className='row'),
+    # Third row
+    html.Div([
+        html.H3('Advanced Agreement Plots'),
+        # Dropdowns
+        html.Div([
+            html.Div([
+                html.P('Select a feature:'),
+                dcc.Dropdown(
+                    id='feature_dropdown_id',
+                    options=dropdown_options['feature'],
+                    value='male_breadwinner'
+                ),
+            ], style={
+                'width': '25%',
+                'display': 'inline',
+                'padding': '25px',
+                'margin': '40px 20px 40px 0px'
+            }),
+            html.Div([
+                html.P('Group Barplot By'),
+                dcc.Dropdown(
+                     id='group_by_dropdown_id',
+                     options=dropdown_options['group_by'],
+                     value='sex'
+                     ),
+            ], style={
+                'width': '25%',
+                'display': 'inline',
+                'padding': '5px',
+                'margin': '20px 0px 20px 20px'
+            })
+        ], className='four columns'),
+
+
+        # Selected Figure
+        html.Div([
+            dcc.Graph(
+                id='male_breadwinner_barplot_id',
+                figure=male_breadwinner_barplot_figure
+            )
+        ], className='seven columns'),
+    ], className='row'),
+
+    # Forth row
+    html.Div([
+        # Dropdowns and Figures
+        html.Div([
+            html.H3('Select a Plot to Display'),
+            dcc.Dropdown(
+                id='plot_dropdowns',
+                options=[
+                    {'label': 'Job Prestige and Income by Sex Scatterplot',
+                        'value': 'job_prestige_income_scatterplot_id'},
+                    {'label': 'Distribution of Income by Sex Boxplot',
+                        'value': 'income_boxplot_id'},
+                    {'label': 'Distribution of Job Prestige by Sex Boxplot',
+                        'value': 'prestige_boxplot_id'},
+                    {'label': 'Job Prestige into six categories Faceted Boxplots',
+                        'value': 'job_prestige_facet_grid_id'},
+                ],
+                value='job_prestige_income_scatterplot_id'
+            ),
+        ], className='six columns'),
+
+        # Selected Figure
+        html.Div([
+            dcc.Graph(id='selected_figure_id'),
+        ], className='six columns'),
+    ], className='row'),
+], style={'width': '100%', 'margin': '0 auto'})
+
+
 # Define the callback to update the barplot based on user inputs
+
+
 @app.callback(
     Output('male_breadwinner_barplot_id', 'figure'),
     [Input('feature_dropdown_id', 'value'),
@@ -603,12 +748,31 @@ def update_barplot(feature, group_by):
         'data': drop_down_data_generator(feature, group_by),
         'layout': barplot_layout
     }
-    return male_breadwinner_barplot_figure 
-# In[ ]:
+    return male_breadwinner_barplot_figure
+
+# Plot selection callback
+
+
+@app.callback(
+    Output('selected_figure_id', 'figure'),
+    [Input('plot_dropdowns', 'value')]
+)
+def plot_selector(figure_id):
+    # return the figure selected
+    for figure in figures:
+        if figure_id == figure['id']:
+            return figure['figure']
+
+    return None
+    # return job_prestige_income_scatterplot_figure
+
+
 if __name__ == '__main__':
     app.run_server(mode='inline', port=8050)
-    
-    
+
+# In[ ]:
+
+
 # In[ ]:
 # ### This is a code to download the entire Notebook as HTML to the current Directory
 # ### Note: Full display requires running all chuncks before this section
@@ -633,7 +797,6 @@ exporter.filters = {'markdown2html_mistune': markdown2html_mistune}
 
 with open('gss_data_analytics_dashboard.html', 'w', encoding="utf-8") as f:
     f.write(body)
-
 
 
 # In[ ]:
