@@ -15,7 +15,6 @@
 
 # In[1]:
 
-import nbformat
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
@@ -23,13 +22,11 @@ import plotly.express as px
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
 from jupyter_dash import JupyterDash
+import dash
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 import random
-import nbformat
-from nbconvert.exporters.html import HTMLExporter
-from nbconvert.filters.markdown_mistune import markdown2html_mistune
 external_stylesheets = ['../assets/style.css']
 
 # 'https://codepen.io/chriddyp/pen/bWLwgP.css' removed because I modified CSS
@@ -118,39 +115,39 @@ gss_clean.age = gss_clean.age.astype('float')
 
 
 gender_wage_gap_paragraph = '''
-## The Gender Wage Gap 
+## The Gender Wage Gap
 
-According to the Global Gender Gap Report by World Economic Forum in 2022, 
-**_"Gender parity is not recovering, and It will take another 132 years to close 
-the global gender gap_."** 
-The gender wage gap is a well-documented phenomenon that refers to the difference 
-in earnings between men and women for the same role and responsibilities. 
-The most salient factors contributing to gender-based wealth inequity are gender 
-pay gaps, unequal career progression trajectories, gender gaps in financial literacy, 
-and life events that typically influence women's participation in paid work and their 
-ability to contribute to wealth accumulation. Childcare-related life events have the 
+According to the Global Gender Gap Report by World Economic Forum in 2022,
+**_"Gender parity is not recovering, and It will take another 132 years to close
+the global gender gap_."**
+The gender wage gap is a well-documented phenomenon that refers to the difference
+in earnings between men and women for the same role and responsibilities.
+The most salient factors contributing to gender-based wealth inequity are gender
+pay gaps, unequal career progression trajectories, gender gaps in financial literacy,
+and life events that typically influence women's participation in paid work and their
+ability to contribute to wealth accumulation. Childcare-related life events have the
 greatest impact on gender wealth equity, with women accumulating only 74% of the
-wealth of men on average after a 40-year career in comparable roles if they have 
+wealth of men on average after a 40-year career in comparable roles if they have
 a child to care for.
 
-Despite high levels of female representation in certain industries, 
+Despite high levels of female representation in certain industries,
 there remains a gender gap in leadership roles. In the Personal Services and
 well-being industry, for instance, women account for 62% of the total workforce
 but only 45% of leadership positions.
 
 **Is the gender wage gap due to underperformance in leadership?**
 As an analyst, I was motivated to investigate the relationship between political
-leadership positions and their potential impact on a country's economy, 
-given that these positions represent the highest level of achievement in this domain. 
+leadership positions and their potential impact on a country's economy,
+given that these positions represent the highest level of achievement in this domain.
 
 The global average share of women in parliament rose to 22.9%, with Mexico (50%),
 Nicaragua (50.6%), and Rwanda (61.3%) having the highest shares of women in parliament.
 It is interesting that the countries Nicaragua and Rwanda recorded the highest
-economic growth as a country over the past decade and reached the pinnacle 
+economic growth as a country over the past decade and reached the pinnacle
 last year with 17.70 and 20.06 respectively in their quarterly GDP Growth Rate.
 
-Sources: 
-[weforum](https://www.weforum.org/reports/global-gender-gap-report-2022/) , 
+Sources:
+[weforum](https://www.weforum.org/reports/global-gender-gap-report-2022/) ,
 [American Lifetime wage gap](https://nwlc.org/resource/the-lifetime-wage-gap-state-by-state/),
 [tradingeconomics](https://tradingeconomics.com/)
 '''
@@ -160,24 +157,24 @@ Sources:
 
 
 General_Social_Survey_GSS_paragraph = '''
-## The General Social Survey (GSS)    
+## The General Social Survey (GSS)
 
-The **General Social Survey (GSS)** is a biennial survey conducted by the 
-National Opinion Research Center (NORC) at the University of Chicago. 
+The **General Social Survey (GSS)** is a biennial survey conducted by the
+National Opinion Research Center (NORC) at the University of Chicago.
 The survey has been conducted since 1972 and is designed to gather data
 on social trends and attitudes in the United States.
-The GSS collects information on a wide range of topics, 
-including race relations, gender roles, politics, and religion. 
-The data is collected through face-to-face interviews with a nationally 
+The GSS collects information on a wide range of topics,
+including race relations, gender roles, politics, and religion.
+The data is collected through face-to-face interviews with a nationally
 representative sample of adults in the United States.
 
-The gss_clean dataframe provided in this lab contains data from the GSS, 
-including information on respondents' 
+The gss_clean dataframe provided in this lab contains data from the GSS,
+including information on respondents'
 sex, education, region, age, income, job prestige, and attitudes towards gender roles.
-The data has been cleaned and processed for analysis, and includes a weight variable 
+The data has been cleaned and processed for analysis, and includes a weight variable
 to adjust for sampling bias. This dataset provides a valuable source of information
 for researchers and policymakers interested in understanding social trends in the
-United States. 
+United States.
 '''
 
 
@@ -220,7 +217,7 @@ mean_table_figure = go.Figure(data=[go.Table(
                  title_font_size=20)  # format table and layout
 
 # create Dash app
-app = JupyterDash(__name__, external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 # set layout of app
 app.layout = html.Div(children=[
@@ -257,8 +254,7 @@ male_breadwinner_barplot_figure = {
     ],
     'layout': barplot_layout
 }
-# Create the interactive barplot
-app = JupyterDash(__name__, external_stylesheets=external_stylesheets)
+
 app.layout = html.Div([
     dcc.Graph(id='male_breadwinner_barplot_id',
               figure=male_breadwinner_barplot_figure)
@@ -326,8 +322,7 @@ job_prestige_income_scatterplot_figure.update_layout(
     legend_title='Sex'
 )
 
-# Create app
-app = JupyterDash(__name__, external_stylesheets=external_stylesheets)
+
 
 # Set layout
 app.layout = html.Div([
@@ -363,8 +358,6 @@ prestige_boxplot_figure = px.box(gss_clean,
                                  color_discrete_map={'male': 'blue', 'female': 'red'})
 prestige_boxplot_figure.update_layout(showlegend=False)
 
-# Create app
-app = JupyterDash(__name__, external_stylesheets=external_stylesheets)
 
 # Set layout
 app.layout = html.Div([
@@ -421,8 +414,7 @@ job_prestige_facet_grid_figure.update_layout(
 )
 
 
-# Create app
-app = JupyterDash(__name__, external_stylesheets=external_stylesheets)
+
 
 # Set layout
 app.layout = html.Div([
@@ -460,8 +452,6 @@ app.layout = html.Div([
 # Since I have assigned all the figures to constant Object variables
 # I can reuse the figures here. Reusability is considered pythonic.
 
-# Create app
-app = JupyterDash(__name__, external_stylesheets=external_stylesheets)
 
 app.layout = html.Div([
 
@@ -527,8 +517,7 @@ app.layout = html.Div([
 # In[ ]:
 
 # In[ ]:
-# Define the app layout
-app = JupyterDash(__name__, external_stylesheets=external_stylesheets)
+
 
 # Income impacted
 # Number of Childrens and Care Plot
@@ -593,15 +582,16 @@ def drop_down_data_generator(feature, group_by):
 
     # Generate a random color for the group and append here
     group_colors = {}
+    group_color = '#' + format(random.randint(0, 0xFFFFFF), '06x')
 
     for group in gss_clean[group_by].unique():
-        group_color = f'#{random.randint(0, 0xFFFFFF):06x}'
+
         filtered_data = gss_clean[gss_clean[group_by]
                                   == group][feature].value_counts()
         drop_down_data.append(go.Bar(
             x=filtered_data.index,
             y=filtered_data.values,
-            name=group if group_by != 'education' else f'{str(group)} years',
+            name = group if group_by != 'education' else str(group) + ' years',
             marker={'color': group_colors.setdefault(group, group_color)}
         ))
     return drop_down_data
@@ -872,35 +862,4 @@ def plot_selector(figure_id):
 
 
 if __name__ == '__main__':
-    app.run_server(mode='inline', port=8050)
-
-# In[ ]:
-
-
-# In[ ]:
-# ### This is a code to download the entire Notebook as HTML to the current Directory
-# ### Note: Full display requires running all chuncks before this section
-
-# In[30]:
-
-
-# Reusable function to export as HTML to see the entire Notebook
-
-# Read the .ipynb file
-nb_file = "gss_data_analytics_dashboard.ipynb"
-
-# Convert .ipynb to HTML
-with open(nb_file, "r", encoding="utf-8") as f:
-    nb = nbformat.read(f, nbformat.current_nbformat)
-
-exporter = HTMLExporter()
-exporter.register_filter('markdown2html_mistune', markdown2html_mistune)
-exporter.filters = {'markdown2html_mistune': markdown2html_mistune}
-
-(body, resources) = exporter.from_notebook_node(nb)
-
-with open('gss_data_analytics_dashboard.html', 'w', encoding="utf-8") as f:
-    f.write(body)
-
-
-# In[ ]:
+    app.run_server(debug=False)
