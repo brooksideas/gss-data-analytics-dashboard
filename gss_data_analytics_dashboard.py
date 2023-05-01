@@ -39,7 +39,7 @@ external_stylesheets = ['../assets/style.css']
 # In[2]:
 
 
-gss = pd.read_csv("gss2018.csv",
+gss = pd.read_csv("https://raw.githubusercontent.com/brooksideas/gss-data-analytics-dashboard/main/gss2018.csv",
                   encoding='cp1252', na_values=['IAP', 'IAP,DK,NA,uncodeable', 'NOT SURE',
                                                 'DK', 'IAP, DK, NA, uncodeable', '.a', "CAN'T CHOOSE"])
 
