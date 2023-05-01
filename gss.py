@@ -19,12 +19,8 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
-import plotly.graph_objects as go
-import plotly.figure_factory as ff
-from jupyter_dash import JupyterDash
 import dash
-from dash import dcc
-from dash import html
+from dash import dcc , html
 from dash.dependencies import Input, Output
 import random
 external_stylesheets = ['../assets/style.css']
@@ -216,7 +212,7 @@ mean_table_figure = go.Figure(data=[go.Table(
                  height=400,
                  title_font_size=20)  # format table and layout
 
-# create Dash app
+# create Dash app layout
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 # set layout of app
@@ -516,9 +512,7 @@ app.layout = html.Div([
 
 # In[ ]:
 
-# In[ ]:
-# Define the app layout
-app = JupyterDash(__name__, external_stylesheets=external_stylesheets)
+# In[ ]: 
 
 # Income impacted
 # Number of Childrens and Care Plot
