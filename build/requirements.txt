@@ -1,0 +1,9 @@
+numpy
+numpydoc
+pandas
+plotly
+plotly-express
+dash
+dash-core-components
+dash-html-components
+dash-table
