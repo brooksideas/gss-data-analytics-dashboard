@@ -1,0 +1,3 @@
+[build]
+  command = "python gss.py"
+  publish = "build/"
