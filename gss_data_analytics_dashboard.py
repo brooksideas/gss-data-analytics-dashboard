@@ -30,8 +30,9 @@ import random
 import nbformat
 from nbconvert.exporters.html import HTMLExporter
 from nbconvert.filters.markdown_mistune import markdown2html_mistune
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+external_stylesheets = ['../assets/style.css']
 
+# 'https://codepen.io/chriddyp/pen/bWLwgP.css' removed because I modified CSS
 
 # For this lab, we will be working with the 2019 General Social Survey one last time.
 
@@ -530,10 +531,37 @@ app.layout = html.Div([
 app = JupyterDash(__name__, external_stylesheets=external_stylesheets)
 
 # Income impacted
-# Number of Childrens
+# Number of Childrens and Care Plot
 children_options = [0, 1, 2, 3, 4, 5, 6, 7, 8]
 sex_options = gss_clean['sex'].unique().tolist()
 region_options = gss_clean['region'].unique().tolist()
+
+# define function to map region names to state abbreviations
+
+
+def region_to_state(region):
+    if region == 'new england':
+        return random.choice(['ME', 'NH', 'VT', 'MA', 'RI', 'CT'])
+    elif region == 'middle atlantic':
+        return random.choice(['NY', 'PA', 'NJ'])
+    elif region == 'e. nor. central':
+        return random.choice(['OH', 'MI', 'IN', 'IL', 'WI'])
+    elif region == 'w. nor. central':
+        return random.choice(['MN', 'IA', 'MO', 'ND', 'SD', 'NE', 'KS'])
+    elif region == 'south atlantic':
+        return random.choice(['DE', 'MD', 'DC', 'VA', 'WV', 'NC', 'SC', 'GA', 'FL'])
+    elif region == 'e. sou. central':
+        return random.choice(['KY', 'TN', 'MS', 'AL'])
+    elif region == 'w. sou. central':
+        return random.choice(['AR', 'LA', 'OK', 'TX'])
+    elif region == 'mountain':
+        return random.choice(['MT', 'ID', 'WY', 'NV', 'UT', 'CO', 'AZ', 'NM'])
+    elif region == 'pacific':
+        return random.choice(['WA', 'OR', 'CA', 'AK', 'HI'])
+    else:
+        return random.choice([''])
+
+
 # Male Breadwinner Functions
 barplot_layout = go.Layout(
     xaxis={'title': 'Level of Agreement'},
@@ -632,7 +660,7 @@ app.layout = html.Div([
                     value=sex_options[0]
                 ),
             ],  style={
-                'width': '50%',
+                'width': '100%',
                 'display': 'block',
                 'padding': '25px',
                 'margin': '40px 0px 40px 0px'
@@ -646,7 +674,7 @@ app.layout = html.Div([
                     value=children_options[2]
                 ),
             ], style={
-                'width': '50%',
+                'width': '100%',
                 'display': 'inline-block',
                 'padding': '25px',
                 'margin': '40px 0px 40px 0px'
@@ -659,22 +687,26 @@ app.layout = html.Div([
                     value=region_options[1]
                 ),
             ], style={
-                'width': '50%',
+                'width': '100%',
                 'display': 'block',
                 'padding': '25px',
                 'margin': '40px 0px 40px 0px'
             }),
 
-            dcc.Graph(id='care_plot_id'),
-        ], className='six columns'),
+        ], className='four columns'),
 
         # US Map
 
-        # html.Div([
-        #     html.H3('US Map'),
+        html.Div([
+            html.H3('Respondents approximate location on US Map',
+                    style={'text-align': 'center'}),
+            dcc.Graph(id='us_map_id'),
+        ], className='eight columns'),
 
-        #     # dcc.Graph(id='us_map_id', figure=us_map_figure),
-        # ], className='six columns'),
+        # Respondents plot
+        html.Div([
+            dcc.Graph(id='care_plot_id'),
+        ], className='twelve columns'),
     ], className='row'),
     # Third row
     html.Div([
@@ -763,16 +795,50 @@ def update_scatter_plot(sex, children, region):
                      (gss_clean['children_number'] == children) &
                      (gss_clean['region'] == region)]
     data = data.assign(gender=data['sex'])
-    fig = px.scatter(data, x='respondent_income', y='children_number',
-                     color='respondent_income',
-                     facet_col='region',
-                     title='Respondents Income vs Children Number by Region and Sex',
-                     labels={'respondent_income': 'Respondent Income', 'children_number': 'Children Number'})
+    care_scatterplot_figure = px.scatter(data, x='respondent_income', y='children_number',
+                                         color='respondent_income',
+                                         facet_col='region',
+                                         title='Respondents Income range vs Children Care Number by Region and Sex',
+                                         labels={
+                                             'respondent_income': 'Respondent Income',
+                                             'children_number': 'Children Number'
+                                         })
 
-    fig.update_layout(xaxis=dict(ticksuffix='K'))
-    # display the plot
-    # dcc.Graph(id='scatter_plot_id', figure=fig)
-    return fig
+    care_scatterplot_figure.update_layout(xaxis=dict(ticksuffix='K'))
+    # return the plot
+    return care_scatterplot_figure
+
+# define callback to update US map
+
+
+@app.callback(
+    Output('us_map_id', 'figure'),
+    [Input('sex_dropdown', 'value'),
+     Input('children_dropdown', 'value'),
+     Input('region_dropdown', 'value')]
+)
+def us_map_generator(sex, children, region):
+    # filter data based on dropdown selections
+    data = gss_clean[(gss_clean['sex'] == sex) &
+                     (gss_clean['children_number'] == children) &
+                     (gss_clean['region'] == region)]
+    data = data.assign(gender=data['sex'])
+    data['state'] = data['region'].apply(region_to_state)
+    # Create the choropleth map
+    us_map_figure = px.choropleth(locations=data['state'].unique().tolist(),
+                                  locationmode='USA-states',
+                                  scope='usa',
+                                  color_continuous_scale='reds',
+                                  range_color=(
+                                      0, len(data['state'].unique().tolist())),
+                                  labels={'count': 'Respondents Count'})
+    us_map_figure.update_layout(
+        height=500,  # set the height of the map
+        width=1000,  # set the width of the map
+    )
+
+    # return the map figure
+    return us_map_figure
 
 
 @app.callback(
