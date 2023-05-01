@@ -517,7 +517,8 @@ app.layout = html.Div([
 # In[ ]:
 
 # In[ ]:
-
+# Define the app layout
+app = JupyterDash(__name__, external_stylesheets=external_stylesheets)
 
 # Income impacted
 # Number of Childrens and Care Plot
@@ -582,16 +583,15 @@ def drop_down_data_generator(feature, group_by):
 
     # Generate a random color for the group and append here
     group_colors = {}
-    group_color = '#' + format(random.randint(0, 0xFFFFFF), '06x')
 
     for group in gss_clean[group_by].unique():
-
+        group_color = f'#{random.randint(0, 0xFFFFFF):06x}'
         filtered_data = gss_clean[gss_clean[group_by]
                                   == group][feature].value_counts()
         drop_down_data.append(go.Bar(
             x=filtered_data.index,
             y=filtered_data.values,
-            name = group if group_by != 'education' else str(group) + ' years',
+            name=group if group_by != 'education' else f'{str(group)} years',
             marker={'color': group_colors.setdefault(group, group_color)}
         ))
     return drop_down_data
